@@ -7,7 +7,7 @@ tms9918a_emu uses the [minifb](https://github.com/emoon/rust_minifb) crate to em
 
 High-level functions are provided as well as low-level functions, making it easy to control the VDP without needing to use the control and data ports.
 
-This emulator is a work-in-progress and currently only supports the Graphics I and Text video modes, and sprites are unsupported in all modes. In its current state, this emulator is more of a TMS9918 (non-A varient) emulator.
+This emulator is a work-in-progress and currently only supports the Graphics I and Text video modes, and sprites are unsupported in all modes. In its current state, this emulator is more of a TMS9918 (non-A variant) emulator.
 
 ## Example
 This is a small [example program](examples/text/src/main.rs) which uses Text mode to display a hello world message, showing how to use the high-level functions:
