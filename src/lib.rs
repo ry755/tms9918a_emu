@@ -407,7 +407,7 @@ impl TMS9918A {
 
     /// Write name table contents
     /// 
-    /// Name table offset register must be set first
+    /// Name table offset register must be set first.
     #[inline]
     pub fn write_name_table(&mut self, offset: usize, data: u8) {
         self.vdp_ram[self.vdp_name_table_offset as usize + offset] = data;
@@ -467,7 +467,7 @@ impl TMS9918A {
 
     /// Write color table contents
     /// 
-    /// Color table offset register must be set first
+    /// Color table offset register must be set first.
     #[inline]
     pub fn write_color_table(&mut self, offset: usize, data: u8) {
         self.vdp_ram[self.vdp_color_table_offset as usize + offset] = data;
@@ -475,7 +475,7 @@ impl TMS9918A {
 
     /// Read color table contents
     /// 
-    /// Color table offset register must be set first
+    /// Color table offset register must be set first.
     #[inline]
     pub fn read_color_table(&self, offset: usize) -> u8 {
         self.vdp_ram[self.vdp_color_table_offset as usize + offset]
@@ -538,7 +538,7 @@ impl TMS9918A {
 
     /// Write pattern table contents
     /// 
-    /// Pattern table offset register must be set first
+    /// Pattern table offset register must be set first.
     #[inline]
     pub fn write_pattern_table(&mut self, offset: usize, data: u8) {
         self.vdp_ram[self.vdp_pattern_table_offset as usize + offset] = data;
@@ -546,7 +546,7 @@ impl TMS9918A {
 
     /// Read pattern table contents
     /// 
-    /// Pattern table offset register must be set first
+    /// Pattern table offset register must be set first.
     #[inline]
     pub fn read_pattern_table(&self, offset: usize) -> u8 {
         self.vdp_ram[self.vdp_pattern_table_offset as usize + offset]
