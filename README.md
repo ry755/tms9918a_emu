@@ -10,8 +10,10 @@ High-level functions are provided as well as low-level functions, making it easy
 This emulator is a work-in-progress and currently only supports the Graphics I and Text video modes, and sprites are unsupported in all modes. In its current state, this emulator is more of a TMS9918 (non-A variant) emulator.
 
 ## Example
-This is a small [example program](examples/text/src/main.rs) which uses Text mode to display a hello world message, showing how to use the high-level functions:
-![Text Mode example](examples/text/images/screenshot.png)
+This is a small [example program](examples/high-level-text/src/main.rs) which uses Text mode to display a hello world message, showing how to use the high-level functions:
+![High-level Text mode example](examples/high-level-text/images/screenshot.png)
+
+A similar [example program](examples/low-level-text/src/main.rs) is available which shows how to use the low-level functions to display the same hello world message.
 
 ## License
 
