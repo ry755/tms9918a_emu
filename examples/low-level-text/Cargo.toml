@@ -1,0 +1,8 @@
+[package]
+name = "low-level-text"
+version = "0.1.0"
+authors = ["ry755"]
+edition = "2018"
+
+[dependencies]
+tms9918a_emu = { path = "../../" }
