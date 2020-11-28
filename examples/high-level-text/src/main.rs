@@ -1,8 +1,10 @@
+// TMS9918A Text Mode example using high-level functions
+
 use tms9918a_emu::{TMS9918A, VideoMode};
 
 fn main() {
     // create a new TMS9918A VDP instance
-    let mut vdp = TMS9918A::new("TMS9918A Text Mode Example");
+    let mut vdp = TMS9918A::new("TMS9918A Text Mode Example (high-level)");
 
     // set the name table base address to 0x0000 (base address = multiplier * 0x0400)
     vdp.set_name_table_multiplier(0);
