@@ -1,3 +1,5 @@
+//! Texas Instruments TMS9918A VDP emulator library
+
 use minifb::{Scale, ScaleMode, Window, WindowOptions};
 use rand::Rng;
 
