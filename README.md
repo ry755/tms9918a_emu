@@ -1,6 +1,8 @@
 # tms9918a_emu
 Texas Instruments TMS9918A VDP emulator library for Rust
 
+[GitHub](https://github.com/ry755/tms9918a_emu) | [crates.io](https://crates.io/crates/tms9918a_emu) | [API Documentation](https://docs.rs/tms9918a_emu)
+
 ![TMS9918A](https://upload.wikimedia.org/wikipedia/commons/d/de/TMS9918A_02.jpg)
 
 tms9918a_emu uses the [minifb](https://github.com/emoon/rust_minifb) crate to emulate a [Texas Instruments TMS9918A](https://en.wikipedia.org/wiki/Texas_Instruments_TMS9918) video display processor in a window.
