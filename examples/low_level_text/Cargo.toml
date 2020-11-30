@@ -1,5 +1,5 @@
 [package]
-name = "low-level-text"
+name = "low_level_text"
 version = "0.1.0"
 authors = ["ry755"]
 edition = "2018"
