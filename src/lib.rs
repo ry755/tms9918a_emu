@@ -152,7 +152,7 @@ impl TMS9918A {
                             let offset = self.vdp_pattern_table_offset as usize + (name_entry as usize * 8) + (pattern_byte);
                             let pattern = self.vdp_ram[offset];
                             let pattern_bit_indexes = 0..8;
-                            let frame_bit_indexes = pattern_bit_indexes.clone().rev();
+                            let frame_bit_indexes = (0..8).rev();
                             for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
                                 let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
                                 let frame_offset = (tile_x * 8) + (tile_y * 8 * frame_width) + (pattern_byte * frame_width) + frame_bit;
