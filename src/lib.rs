@@ -199,7 +199,7 @@ impl TMS9918A {
                 *i = 0;
             }
             // update window
-            self.window.update_with_buffer(&self.frame, 256, 195).unwrap();
+            self.window.update_with_buffer(&self.frame, 256, 196).unwrap();
         }
     }
 
