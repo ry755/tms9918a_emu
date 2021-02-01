@@ -7,8 +7,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/ry755/tms9918a_emu.git"
 edition = "2018"
-version = "0.2.1"
+version = "0.3.0"
 
 [dependencies]
-minifb = "0.19.1"
 rand = "0.7.3"

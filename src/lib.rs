@@ -1,6 +1,5 @@
 //! Texas Instruments TMS9918A VDP emulator library
 
-use minifb::{Scale, ScaleMode, Window, WindowOptions};
 use rand::Rng;
 
 // TMS9918A video modes
@@ -29,10 +28,12 @@ pub enum VideoMode {
 }
 
 pub struct TMS9918A {
-    /// minifb window
-    pub window: minifb::Window,
-    /// Window framebuffer
+    /// VDP framebuffer
     pub frame: Vec<u32>,
+    /// VDP framebuffer width
+    pub frame_width: usize,
+    /// VDP framebuffer height
+    pub frame_height: usize,
     // if true, clear framebuffer on next update
     frame_clear: bool,
 
@@ -59,40 +60,23 @@ pub struct TMS9918A {
 }
 
 impl TMS9918A {
-    /// Create a new TMS9918A state and a window with specified title
+    /// Create a new TMS9918A state
     /// 
     /// # Examples
     /// 
     /// ```no_run
     /// # use tms9918a_emu::TMS9918A;
     /// # fn main() {
-    /// let mut vdp = TMS9918A::new("Window Title");
+    /// let mut vdp = TMS9918A::new();
     /// # }
     /// ```
-    pub fn new(title: &str) -> Self {
-        let mut window = Window::new(
-            title,
-            256,
-            196,
-            WindowOptions {
-                resize: true,
-                scale_mode: ScaleMode::AspectRatioStretch,
-                scale: Scale::X4,
-                ..WindowOptions::default()
-            },
-        )
-        .unwrap_or_else(|e| {
-            panic!("{}", e);
-        });
-
-        // limit to max ~60 fps update rate
-        window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-
+    pub fn new() -> Self {
         let frame: Vec<u32> = vec![0; 256 * 196];
 
         TMS9918A {
-            window: window,
             frame: frame,
+            frame_width: 256,
+            frame_height: 196,
             frame_clear: false,
             vdp_ram: (0..16*1024).map(|_| rand::thread_rng().gen()).collect(),
             vdp_name_table_offset: 0,
@@ -107,14 +91,14 @@ impl TMS9918A {
         }
     }
 
-    /// Update the framebuffer and window from the TMS9918A video memory contents
+    /// Update the framebuffer from the TMS9918A video memory contents
     ///
     /// # Examples
     /// 
     /// ```no_run
     /// # use tms9918a_emu::TMS9918A;
     /// # fn main() {
-    /// let mut vdp = TMS9918A::new("Window Title");
+    /// let mut vdp = TMS9918A::new();
     /// 
     /// while vdp.window.is_open() {
     ///     vdp.update();
@@ -139,8 +123,8 @@ impl TMS9918A {
             // blanking bit is set, screen is enabled
             // Graphics I
             if self.vdp_mode == VideoMode::Gfx1 {
-                let frame_width = 256;
-                let frame_height = 196;
+                self.frame_width = 256;
+                self.frame_height = 196;
                 for tile_y in 0..24 {
                     for tile_x in 0..32 {
                         let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 32) + tile_x];
@@ -155,21 +139,18 @@ impl TMS9918A {
                             let frame_bit_indexes = (0..8).rev();
                             for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
                                 let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
-                                let frame_offset = (tile_x * 8) + (tile_y * 8 * frame_width) + (pattern_byte * frame_width) + frame_bit;
+                                let frame_offset = (tile_x * 8) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
                                 self.frame[frame_offset] = pixel;
                             }
                         }
                     }
                 }
-
-                // update window
-                self.window.update_with_buffer(&self.frame, frame_width, frame_height).unwrap();
             }
 
             // Text
             if self.vdp_mode == VideoMode::Text {
-                let frame_width = 240;
-                let frame_height = 196;
+                self.frame_width = 240;
+                self.frame_height = 196;
                 for tile_y in 0..24 {
                     for tile_x in 0..40 {
                         let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 40) + tile_x];
@@ -183,23 +164,18 @@ impl TMS9918A {
                             let frame_bit_indexes = (0..6).rev();
                             for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
                                 let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
-                                let frame_offset = (tile_x * 6) + (tile_y * 8 * frame_width) + (pattern_byte * frame_width) + frame_bit;
+                                let frame_offset = (tile_x * 6) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
                                 self.frame[frame_offset] = pixel;
                             }
                         }
                     }
                 }
-
-                // update window
-                self.window.update_with_buffer(&self.frame, frame_width, frame_height).unwrap();
             }
         } else {
             // blanking bit is clear, screen is disabled
             for i in self.frame.iter_mut() {
                 *i = 0;
             }
-            // update window
-            self.window.update_with_buffer(&self.frame, 256, 196).unwrap();
         }
     }
 
@@ -247,7 +223,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // use text mode
     /// vdp.set_video_mode(VideoMode::Text);
     /// # }
@@ -352,7 +328,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // set name table base address to 0x0400
     /// vdp.set_name_table_multiplier(1);
     /// # }
@@ -374,7 +350,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // fill the first 5 name table entries
     /// let name_table: [u8; 5] = [1, 2, 3, 4, 5];
     /// vdp.fill_name_table(&name_table, 0, name_table.len());
@@ -432,7 +408,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // set color table base address to 0x0040
     /// vdp.set_color_table_multiplier(1);
     /// # }
@@ -451,7 +427,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // fill the first 5 color table entries
     /// // black on white, white on black, light blue on dark blue, light red on cyan, black on gray
     /// let color_table: [u8; 5] = [0x1F, 0xF1, 0x54, 0x97, 0x1E];
@@ -492,7 +468,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // set pattern table base address to 0x0800
     /// vdp.set_pattern_table_multiplier(1);
     /// # }
@@ -514,7 +490,7 @@ impl TMS9918A {
     /// ```no_run
     /// # use tms9918a_emu::{TMS9918A, VideoMode};
     /// # fn main() {
-    /// # let mut vdp = TMS9918A::new("Window Title");
+    /// # let mut vdp = TMS9918A::new();
     /// // fill 8 pattern table entries starting at offset 8
     /// // 8 pattern table entries make one tile
     /// // this makes tile 1 a nice smiley face :)
