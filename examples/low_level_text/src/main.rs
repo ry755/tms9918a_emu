@@ -33,11 +33,31 @@
 //    the data byte pointed to by the (now incremented) internal address pointer is immediately read into the read-ahead register
 //    additional VRAM data bytes can be read from the data port without needing to send the address again
 
+use minifb::{Scale, ScaleMode, Window, WindowOptions};
 use tms9918a_emu::TMS9918A;
 
 fn main() {
     // create a new TMS9918A VDP instance
-    let mut vdp = TMS9918A::new("TMS9918A Text Mode Example (low-level)");
+    let mut vdp = TMS9918A::new();
+
+    // create a new minifb window
+    let mut window = Window::new(
+        "TMS9918A Text Mode Example (low-level)",
+        256,
+        196,
+        WindowOptions {
+            resize: true,
+            scale_mode: ScaleMode::AspectRatioStretch,
+            scale: Scale::X4,
+            ..WindowOptions::default()
+        },
+    )
+    .unwrap_or_else(|e| {
+        panic!("{}", e);
+    });
+
+    // limit to max ~60 fps update rate
+    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     // register 0: disable bitmap mode, disable external video input
     vdp.write_control_port(0b00000000);
@@ -58,6 +78,7 @@ fn main() {
     // set VDP internal address pointer to the pattern table location
     vdp.write_control_port(0x00);
     vdp.write_control_port(0x48); // 0x08 | 0x40
+
     // fill pattern table with font data
     let font = include_bytes!("font.bin");
     for i in font.iter() {
@@ -67,6 +88,7 @@ fn main() {
     // set VDP internal address pointer to the name table location
     vdp.write_control_port(0x00);
     vdp.write_control_port(0x40); // 0x00 | 0x40
+
     // clear the screen
     // the video memory contains random data on startup, similar to how real memory works
     for _ in 0..960 { // 40x24 tiles = 960
@@ -76,14 +98,22 @@ fn main() {
     // set VDP internal address pointer to the name table location + 40 to start on the second line of tiles
     vdp.write_control_port(0x28);
     vdp.write_control_port(0x40); // 0x00 | 0x40
+
     // write text by iterating over a string
     let text_string = "Hello, world!";
     for c in text_string.chars() {
         vdp.write_data_port(c as u8);
     }
 
-    // update window contents
-    while vdp.window.is_open() {
+    // update VDP framebuffer and window contents
+    while window.is_open() {
         vdp.update();
+
+        window.update_with_buffer(
+            &vdp.frame,
+            vdp.frame_width,
+            vdp.frame_height,
+        )
+        .unwrap();
     }
 }

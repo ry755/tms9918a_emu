@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 tms9918a_emu = { path = "../../" }
+minifb = "0.19.2"
