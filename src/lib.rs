@@ -100,7 +100,7 @@ impl TMS9918A {
     /// # fn main() {
     /// let mut vdp = TMS9918A::new();
     /// 
-    /// while vdp.window.is_open() {
+    /// loop {
     ///     vdp.update();
     /// }
     /// # }
