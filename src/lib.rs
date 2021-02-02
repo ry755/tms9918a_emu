@@ -304,6 +304,16 @@ impl TMS9918A {
         }
     }
 
+    /// Read register value
+    /// 
+    /// Reading from VDP registers is not supported by the real hardware.
+    /// 
+    /// This is mainly intended for debugging purposes.
+    pub fn read_register(&mut self, register: u8) -> u8 {
+        let register = self.vdp_register[register as usize];
+        register
+    }
+
     /// Write memory contents
     #[inline]
     pub fn write_ram(&mut self, address: usize, data: u8) {
