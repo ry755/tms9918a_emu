@@ -5,7 +5,7 @@ Texas Instruments TMS9918A VDP emulator library for Rust
 
 ![TMS9918A](https://upload.wikimedia.org/wikipedia/commons/d/de/TMS9918A_02.jpg)
 
-tms9918a_emu emulates a [Texas Instruments TMS9918A](https://en.wikipedia.org/wiki/Texas_Instruments_TMS9918) video display processor and provides a basic framebuffer as `Vec<u32>` which can be used with other creates, such as [minifb](https://github.com/emoon/rust_minifb), to create a window.
+tms9918a_emu emulates a [Texas Instruments TMS9918A](https://en.wikipedia.org/wiki/Texas_Instruments_TMS9918) video display processor and provides a basic framebuffer as `Vec<u32>` which can be used with other crates, such as [minifb](https://github.com/emoon/rust_minifb), to create a window.
 
 High-level functions are provided as well as low-level functions, making it easy to control the VDP without needing to use the control and data ports.
 
