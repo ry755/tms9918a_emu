@@ -71,10 +71,8 @@ impl TMS9918A {
     /// # }
     /// ```
     pub fn new() -> Self {
-        let frame: Vec<u32> = vec![0; 256 * 196];
-
         TMS9918A {
-            frame: frame,
+            frame: vec![0; 256 * 196],
             frame_width: 256,
             frame_height: 196,
             frame_clear: false,
@@ -106,10 +104,12 @@ impl TMS9918A {
     /// # }
     /// ```
     pub fn update(&mut self) {
-        let colors: [u32; 16] = [0x000000, 0x000000, 0x21C942, 0x5EDC78,
-                                0x5455ED, 0x7D75FC, 0xD3524D, 0x43EBF6,
-                                0xFD5554, 0xFF7978, 0xD3C153, 0xE5CE80,
-                                0x21B03C, 0xC95BBA, 0xCCCCCC, 0xFFFFFF];
+        let colors: [u32; 16] = [
+            0x000000, 0x000000, 0x21C942, 0x5EDC78,
+            0x5455ED, 0x7D75FC, 0xD3524D, 0x43EBF6,
+            0xFD5554, 0xFF7978, 0xD3C153, 0xE5CE80,
+            0x21B03C, 0xC95BBA, 0xCCCCCC, 0xFFFFFF
+        ];
 
         if self.frame_clear {
             for i in self.frame.iter_mut() {
@@ -121,56 +121,56 @@ impl TMS9918A {
         // check blanking bit
         if self.vdp_register[1] & (1 << 6) != 0 {
             // blanking bit is set, screen is enabled
-            // Graphics I
-            if self.vdp_mode == VideoMode::Gfx1 {
-                self.frame_width = 256;
-                self.frame_height = 196;
-                for tile_y in 0..24 {
-                    for tile_x in 0..32 {
-                        let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 32) + tile_x];
-                        let color_entry = name_entry / 8;
-                        let color_byte = self.vdp_ram[self.vdp_color_table_offset as usize + color_entry as usize];
-                        let foreground_color = colors[color_byte as usize >> 4 & 0x0F];
-                        let background_color = colors[color_byte as usize & 0x0F];
-                        for pattern_byte in 0..8 {
-                            let offset = self.vdp_pattern_table_offset as usize + (name_entry as usize * 8) + (pattern_byte);
-                            let pattern = self.vdp_ram[offset];
-                            let pattern_bit_indexes = 0..8;
-                            let frame_bit_indexes = (0..8).rev();
-                            for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
-                                let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
-                                let frame_offset = (tile_x * 8) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
-                                self.frame[frame_offset] = pixel;
+            match self.vdp_mode {
+                VideoMode::Gfx1 => {
+                    self.frame_width = 256;
+                    self.frame_height = 196;
+                    for tile_y in 0..24 {
+                        for tile_x in 0..32 {
+                            let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 32) + tile_x];
+                            let color_entry = name_entry / 8;
+                            let color_byte = self.vdp_ram[self.vdp_color_table_offset as usize + color_entry as usize];
+                            let foreground_color = colors[color_byte as usize >> 4 & 0x0F];
+                            let background_color = colors[color_byte as usize & 0x0F];
+                            for pattern_byte in 0..8 {
+                                let offset = self.vdp_pattern_table_offset as usize + (name_entry as usize * 8) + (pattern_byte);
+                                let pattern = self.vdp_ram[offset];
+                                let pattern_bit_indexes = 0..8;
+                                let frame_bit_indexes = (0..8).rev();
+                                for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
+                                    let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
+                                    let frame_offset = (tile_x * 8) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
+                                    self.frame[frame_offset] = pixel;
+                                }
                             }
                         }
                     }
                 }
-            }
-
-            // Text
-            if self.vdp_mode == VideoMode::Text {
-                self.frame_width = 240;
-                self.frame_height = 196;
-                for tile_y in 0..24 {
-                    for tile_x in 0..40 {
-                        let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 40) + tile_x];
-                        let color_byte = self.vdp_register[7];
-                        let foreground_color = colors[color_byte as usize >> 4 & 0x0F];
-                        let background_color = colors[color_byte as usize & 0x0F];
-                        for pattern_byte in 0..8 {
-                            let offset = self.vdp_pattern_table_offset as usize + (name_entry as usize * 8) + (pattern_byte);
-                            let pattern = self.vdp_ram[offset];
-                            let pattern_bit_indexes = 2..8;
-                            let frame_bit_indexes = (0..6).rev();
-                            for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
-                                let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
-                                let frame_offset = (tile_x * 6) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
-                                self.frame[frame_offset] = pixel;
+                VideoMode::Text => {
+                    self.frame_width = 240;
+                    self.frame_height = 196;
+                    for tile_y in 0..24 {
+                        for tile_x in 0..40 {
+                            let name_entry = self.vdp_ram[self.vdp_name_table_offset as usize + (tile_y * 40) + tile_x];
+                            let color_byte = self.vdp_register[7];
+                            let foreground_color = colors[color_byte as usize >> 4 & 0x0F];
+                            let background_color = colors[color_byte as usize & 0x0F];
+                            for pattern_byte in 0..8 {
+                                let offset = self.vdp_pattern_table_offset as usize + (name_entry as usize * 8) + (pattern_byte);
+                                let pattern = self.vdp_ram[offset];
+                                let pattern_bit_indexes = 2..8;
+                                let frame_bit_indexes = (0..6).rev();
+                                for (pattern_bit, frame_bit) in pattern_bit_indexes.zip(frame_bit_indexes) {
+                                    let pixel = if pattern & (1 << pattern_bit) != 0 { foreground_color } else { background_color };
+                                    let frame_offset = (tile_x * 6) + (tile_y * 8 * self.frame_width) + (pattern_byte * self.frame_width) + frame_bit;
+                                    self.frame[frame_offset] = pixel;
+                                }
                             }
                         }
                     }
                 }
-            }
+                _ => panic!("unimplemented video mode: {:?}", self.vdp_mode),
+            };
         } else {
             // blanking bit is clear, screen is disabled
             for i in self.frame.iter_mut() {
